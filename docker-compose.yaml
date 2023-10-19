@@ -1,0 +1,31 @@
+version: '3.7'
+services:
+  php:
+    image: php:8.2-fpm-bullseye
+    container_name: myapp_php
+    volumes:
+      - files:/var/www/bassfactory
+    networks:
+      - myapp
+  nginx:
+    image: nginx:latest
+    container_name: myapp_nginx
+    depends_on:
+      - php # We need to load PHP for the Nginx configuration file
+    ports:
+      - 8000:80 # Redirect Docker port 80 to localhost port 8000. So you'll access to Nginx with localhost:8000
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - myapp
+
+volumes:
+  files: # Same name as inside the container php
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: files # Change with the project path on your computer
+
+networks:
+  myapp:
