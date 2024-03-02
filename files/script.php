@@ -27,14 +27,18 @@ foreach ($allEvents as $event) {
     array_push($eventIds, $eventId);
 }
 
-
-getEvents($wixSiteId, $wixToken);
-
 foreach ($eventIds as $eventId) {
     $eventInformation = retrieveEventFromFacebook($eventId);
     $image = buildImportImage($eventInformation->imagePath, $eventInformation->title);
     $wixImage = importImage($wixSiteId, $wixToken, $image);
     $eventUpdated = buildEventUpdate($eventId, $eventInformation, $wixImage->file->id);
+
+    $get_event_result = getEvent($wixSiteId, $wixToken, $eventInformation->title);
+    if (!isset($get_event_result->message)) { 
+        var_dump("Evenement " . $eventInformation->title . " existe déjà, il n'est pas importé !<br />");
+        continue;
+    } 
+
     $copiedEvent = copyEvent($wixSiteId, $wixToken, $wixEventId);
     $result = updateEvent($wixSiteId, $wixToken, $copiedEvent->event->id, $eventUpdated);
     var_dump("Evenement " . $eventInformation->title . " importé !<br />");
